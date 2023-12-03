@@ -52,6 +52,12 @@ def draw_piano(whites, blacks):
         # This will define the notes that will play when a key is pressed
         note = mp.N(key, duration=0.5)
         mp.write(note, name=f"{key}.mid")
+        chord = mp.C(f"{key}:maj", duration=0.5)
+        mp.write(chord, name=f"{key}_chord.mid")
+        scale = mp.chord(f"{key}, +2, +4, +5, +7, +9, +11, +12",
+                     duration=[1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/4],
+                     interval=[1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/4])
+        mp.write(scale, name=f"{key}_scale.mid")
 
     # this loop ensures that the black keys are not only created, but there are keys
     # that are skipped
@@ -86,6 +92,12 @@ def draw_piano(whites, blacks):
         # This will define the note that will play when this key is pressed
         note = mp.N(key, duration=0.5)
         mp.write(note, name=f"{key}.mid")
+        chord = mp.C(f"{key}:maj", duration=0.5)
+        mp.write(chord, name=f"{key}_chord.mid")
+        scale = mp.chord(f"{key}, +2, +4, +5, +7, +9, +11, +12",
+                     duration=[1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 4],
+                     interval=[1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 4])
+        mp.write(scale, name=f"{key}_scale.mid")
 
     # this loop defines the gray exterior surrounding the key when clicking on it
     for i in range(len(whites)):
@@ -98,9 +110,34 @@ def draw_piano(whites, blacks):
 
 
 run = True
+chords = False
+scales = False
 while run:
     timer.tick(fps)
     screen.fill('goldenrod')
+
+    # This will create the chord button
+    chord_button = pygame.Surface((20, 20))
+    if chords:
+        chord_button.fill("white")
+    else:
+        chord_button.fill("black")
+    chord_rect = chord_button.get_rect(topleft=(450, 30))
+    screen.blit(chord_button, chord_rect)
+    chord_label = small_font.render("chords", True, "black")
+    screen.blit(chord_label, (410, 30))
+
+    # This will create the scale button
+    scale_button = pygame.Surface((20, 20))
+    if scales:
+        scale_button.fill("white")
+    else:
+        scale_button.fill("black")
+    scale_rect = scale_button.get_rect(topleft=(550, 30))
+    screen.blit(scale_button, scale_rect)
+    scale_label = small_font.render("scales", True, "black")
+    screen.blit(scale_label, (510, 30))
+
     white_keys, black_keys, active_whites, active_blacks = draw_piano(active_whites, active_blacks)
 
     for event in pygame.event.get():
@@ -108,17 +145,39 @@ while run:
             run = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             black_key = False
+            if chord_rect.collidepoint(event.pos):
+                scales = False
+                if chords:
+                    chords = False
+                else:
+                    chords = True
+            if scale_rect.collidepoint(event.pos):
+                chords = False
+                if scales:
+                    scales = False
+                else:
+                    scales = True
             for i in range(len(black_keys)):
                 if black_keys[i].collidepoint(event.pos):
                     key = pl.black_labels[i]
-                    mixer.music.load(f"{key}.mid")
+                    if chords:
+                        mixer.music.load(f"{key}_chord.mid")
+                    elif scales:
+                        mixer.music.load(f"{key}_scale.mid")
+                    else:
+                        mixer.music.load(f"{key}.mid")
                     mixer.music.play()
                     black_key = True
                     active_blacks.append([i, 30])
             for i in range(len(white_keys)):
                 if white_keys[i].collidepoint(event.pos) and not black_key:
                     key = pl.white_notes[i]
-                    mixer.music.load(f"{key}.mid")
+                    if chords:
+                        mixer.music.load(f"{key}_chord.mid")
+                    elif scales:
+                        mixer.music.load(f"{key}_scale.mid")
+                    else:
+                        mixer.music.load(f"{key}.mid")
                     mixer.music.play()
                     active_whites.append([i, 30])
 
