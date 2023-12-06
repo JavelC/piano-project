@@ -71,6 +71,7 @@ for key, surface in white_keys.items():
 
     # Fill the rectangle with gray color
     # white_rect.get_rect gets position of rectangle and thickness of outline
+    #AI PROVIDED OUTLINE
     white_key = white_rect.get_rect(midleft=(white_key_positions_x[key], 0))
     pygame.draw.rect(white_rect, (100, 100, 100), white_rect.get_rect(), 4)
 
